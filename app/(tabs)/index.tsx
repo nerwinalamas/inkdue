@@ -1,48 +1,24 @@
+import { useBills } from "@/hooks/use-bills";
+import { Bill } from "@/lib/database";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useCallback } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const MOCK_BILLS = [
-  {
-    id: "1",
-    biller: "Meralco",
-    amount: 3200.5,
-    dueDate: "2025-06-10",
-    status: "unpaid",
-    category: "electricity",
-  },
-  {
-    id: "2",
-    biller: "Manila Water",
-    amount: 850.0,
-    dueDate: "2025-06-08",
-    status: "unpaid",
-    category: "water",
-  },
-  {
-    id: "3",
-    biller: "PLDT Home",
-    amount: 1699.0,
-    dueDate: "2025-06-15",
-    status: "unpaid",
-    category: "internet",
-  },
-  {
-    id: "4",
-    biller: "Globe Postpaid",
-    amount: 999.0,
-    dueDate: "2025-05-30",
-    status: "paid",
-    category: "mobile",
-  },
-];
 
 const CATEGORY_ICONS: Record<string, any> = {
   electricity: "flash-outline",
   water: "water-outline",
   internet: "wifi-outline",
   mobile: "phone-portrait-outline",
+  rent: "home-outline",
   other: "receipt-outline",
 };
 
@@ -68,8 +44,22 @@ function getDueBadgeClasses(days: number) {
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const unpaidBills = MOCK_BILLS.filter((b) => b.status === "unpaid");
-  const totalOwed = unpaidBills.reduce((sum, b) => sum + b.amount, 0);
+  const { unpaidBills, totalUnpaid, loading, refresh } = useBills();
+
+  // Refresh data every time tab is focused
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#4F46E5" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -89,7 +79,7 @@ export default function DashboardScreen() {
         <View className="mx-5 rounded-2xl bg-indigo-600 p-5 mb-6">
           <Text className="text-indigo-200 text-sm mb-1">Total unpaid</Text>
           <Text className="text-white text-3xl font-bold">
-            ₱{totalOwed.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+            ₱{totalUnpaid.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
           </Text>
           <Text className="text-indigo-200 text-sm mt-2">
             {unpaidBills.length} bill{unpaidBills.length !== 1 ? "s" : ""}{" "}
@@ -110,19 +100,22 @@ export default function DashboardScreen() {
         {/* Bill list */}
         <View className="px-5 gap-3">
           {unpaidBills.length === 0 ? (
-            <View className="items-center py-12">
+            <View className="items-center py-16">
               <Ionicons
                 name="checkmark-circle-outline"
-                size={48}
-                color="#6B7280"
+                size={56}
+                color="#D1D5DB"
               />
-              <Text className="text-gray-500 mt-3 text-base">
+              <Text className="text-gray-400 mt-3 text-base font-medium">
                 All bills paid!
+              </Text>
+              <Text className="text-gray-400 text-sm mt-1">
+                Add a bill to get started.
               </Text>
             </View>
           ) : (
-            unpaidBills.map((bill) => {
-              const days = getDaysUntilDue(bill.dueDate);
+            unpaidBills.map((bill: Bill) => {
+              const days = getDaysUntilDue(bill.due_date);
               const badge = getDueBadgeClasses(days);
               const icon =
                 CATEGORY_ICONS[bill.category] ?? CATEGORY_ICONS.other;
@@ -140,10 +133,10 @@ export default function DashboardScreen() {
 
                   <View className="flex-1">
                     <Text className="text-gray-900 font-semibold text-base">
-                      {bill.biller}
+                      {bill.biller_name}
                     </Text>
                     <Text className="text-gray-400 text-xs mt-0.5">
-                      {new Date(bill.dueDate).toLocaleDateString("en-PH", {
+                      {new Date(bill.due_date).toLocaleDateString("en-PH", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",

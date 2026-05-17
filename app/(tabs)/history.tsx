@@ -1,50 +1,10 @@
+import { useBills } from "@/hooks/use-bills";
+import { Bill } from "@/lib/database";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const ALL_BILLS = [
-  {
-    id: "1",
-    biller: "Meralco",
-    amount: 3200.5,
-    dueDate: "2025-06-10",
-    status: "unpaid",
-    category: "electricity",
-  },
-  {
-    id: "2",
-    biller: "Manila Water",
-    amount: 850.0,
-    dueDate: "2025-06-08",
-    status: "unpaid",
-    category: "water",
-  },
-  {
-    id: "3",
-    biller: "PLDT Home",
-    amount: 1699.0,
-    dueDate: "2025-06-15",
-    status: "unpaid",
-    category: "internet",
-  },
-  {
-    id: "4",
-    biller: "Globe Postpaid",
-    amount: 999.0,
-    dueDate: "2025-05-30",
-    status: "paid",
-    category: "mobile",
-  },
-  {
-    id: "5",
-    biller: "Meralco",
-    amount: 2980.0,
-    dueDate: "2025-05-10",
-    status: "paid",
-    category: "electricity",
-  },
-];
 
 const CATEGORY_ICONS: Record<string, any> = {
   electricity: "flash-outline",
@@ -58,12 +18,42 @@ const CATEGORY_ICONS: Record<string, any> = {
 type Filter = "all" | "unpaid" | "paid";
 
 export default function HistoryScreen() {
+  const { bills, markAsPaid, markAsUnpaid, deleteBill, refresh } = useBills();
   const [filter, setFilter] = useState<Filter>("all");
 
-  const filtered = ALL_BILLS.filter((b) => {
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
+
+  const filtered = bills.filter((b) => {
     if (filter === "all") return true;
     return b.status === filter;
   });
+
+  function handleTogglePaid(bill: Bill) {
+    if (bill.status === "paid") {
+      markAsUnpaid(bill.id);
+    } else {
+      markAsPaid(bill.id);
+    }
+  }
+
+  function handleDelete(bill: Bill) {
+    Alert.alert(
+      "Delete bill",
+      `Tanggalin ang bill para sa ${bill.biller_name}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteBill(bill.id),
+        },
+      ],
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -75,7 +65,7 @@ export default function HistoryScreen() {
         <View className="px-5 pt-6 pb-4">
           <Text className="text-2xl font-bold text-gray-900">History</Text>
           <Text className="text-sm text-gray-500 mt-1">
-            All your logged bills
+            {bills.length} bill{bills.length !== 1 ? "s" : ""} total
           </Text>
         </View>
 
@@ -84,17 +74,13 @@ export default function HistoryScreen() {
           {(["all", "unpaid", "paid"] as Filter[]).map((f) => (
             <TouchableOpacity
               key={f}
-              className={`flex-1 py-2 rounded-lg items-center ${
-                filter === f ? "bg-white" : ""
-              }`}
+              className={`flex-1 py-2 rounded-lg items-center ${filter === f ? "bg-white" : ""}`}
               onPress={() => setFilter(f)}
               activeOpacity={0.7}
               style={filter === f ? { elevation: 1 } : undefined}
             >
               <Text
-                className={`text-sm font-medium capitalize ${
-                  filter === f ? "text-gray-900" : "text-gray-500"
-                }`}
+                className={`text-sm font-medium capitalize ${filter === f ? "text-gray-900" : "text-gray-500"}`}
               >
                 {f}
               </Text>
@@ -107,25 +93,25 @@ export default function HistoryScreen() {
           {filtered.length === 0 ? (
             <View className="items-center py-16">
               <Ionicons name="file-tray-outline" size={48} color="#D1D5DB" />
-              <Text className="text-gray-400 mt-3">Walang bills dito.</Text>
+              <Text className="text-gray-400 mt-3 text-base">
+                Walang bills dito.
+              </Text>
             </View>
           ) : (
-            filtered.map((bill) => {
+            filtered.map((bill: Bill) => {
               const icon =
                 CATEGORY_ICONS[bill.category] ?? CATEGORY_ICONS.other;
               const isPaid = bill.status === "paid";
 
               return (
-                <TouchableOpacity
+                <View
                   key={bill.id}
                   className="bg-white rounded-2xl p-4 flex-row items-center"
-                  activeOpacity={0.7}
                   style={{ elevation: 1 }}
                 >
+                  {/* Icon */}
                   <View
-                    className={`w-11 h-11 rounded-xl items-center justify-center mr-3 ${
-                      isPaid ? "bg-green-50" : "bg-indigo-50"
-                    }`}
+                    className={`w-11 h-11 rounded-xl items-center justify-center mr-3 ${isPaid ? "bg-green-50" : "bg-indigo-50"}`}
                   >
                     <Ionicons
                       name={icon}
@@ -134,12 +120,13 @@ export default function HistoryScreen() {
                     />
                   </View>
 
+                  {/* Info */}
                   <View className="flex-1">
                     <Text className="text-gray-900 font-semibold text-base">
-                      {bill.biller}
+                      {bill.biller_name}
                     </Text>
                     <Text className="text-gray-400 text-xs mt-0.5">
-                      {new Date(bill.dueDate).toLocaleDateString("en-PH", {
+                      {new Date(bill.due_date).toLocaleDateString("en-PH", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -147,7 +134,8 @@ export default function HistoryScreen() {
                     </Text>
                   </View>
 
-                  <View className="items-end gap-1">
+                  {/* Amount + status */}
+                  <View className="items-end gap-1 mr-2">
                     <Text
                       className={`font-bold text-base ${isPaid ? "text-gray-400" : "text-gray-900"}`}
                     >
@@ -166,7 +154,33 @@ export default function HistoryScreen() {
                       </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
+
+                  {/* Actions */}
+                  <View className="gap-2">
+                    <TouchableOpacity
+                      onPress={() => handleTogglePaid(bill)}
+                      className={`w-8 h-8 rounded-full items-center justify-center ${isPaid ? "bg-gray-100" : "bg-green-100"}`}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={isPaid ? "refresh-outline" : "checkmark"}
+                        size={16}
+                        color={isPaid ? "#6B7280" : "#16A34A"}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDelete(bill)}
+                      className="w-8 h-8 rounded-full items-center justify-center bg-red-50"
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={16}
+                        color="#DC2626"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               );
             })
           )}

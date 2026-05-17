@@ -1,7 +1,11 @@
+import { useBills } from "@/hooks/use-bills";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -20,38 +24,65 @@ const CATEGORIES = [
 ];
 
 export default function AddBillScreen() {
+  const router = useRouter();
+  const { addBill } = useBills();
+
   const [billerName, setBillerName] = useState("");
   const [amount, setAmount] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  const [dueDate, setDueDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [category, setCategory] = useState("electricity");
   const [notes, setNotes] = useState("");
+
+  function formatDate(date: Date) {
+    return date.toLocaleDateString("en-PH", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  function toISODate(date: Date) {
+    return date.toISOString().split("T")[0]; // "2025-06-10"
+  }
 
   function handleSave() {
     if (!billerName.trim()) {
       Alert.alert("Required", "Lagyan mo ng pangalan ang biller.");
       return;
     }
-    if (!amount || isNaN(Number(amount))) {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       Alert.alert("Required", "Maglagay ng valid na amount.");
       return;
     }
-    if (!dueDate) {
-      Alert.alert("Required", "Lagyan ng due date.");
-      return;
-    }
 
-    Alert.alert("Saved!", `Nai-save na ang bill para sa ${billerName}.`, [
-      {
-        text: "OK",
-        onPress: () => {
-          setBillerName("");
-          setAmount("");
-          setDueDate("");
-          setNotes("");
-          setCategory("electricity");
+    addBill({
+      biller_name: billerName.trim(),
+      amount: parseFloat(amount),
+      due_date: toISODate(dueDate),
+      status: "unpaid",
+      category,
+      image_uri: null,
+      notification_id: null,
+    });
+
+    Alert.alert(
+      "Saved!",
+      `Nai-save na ang bill para sa ${billerName.trim()}.`,
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            setBillerName("");
+            setAmount("");
+            setDueDate(new Date());
+            setNotes("");
+            setCategory("electricity");
+            router.push("/(tabs)");
+          },
         },
-      },
-    ]);
+      ],
+    );
   }
 
   return (
@@ -127,19 +158,35 @@ export default function AddBillScreen() {
             />
           </View>
 
-          {/* Due date */}
+          {/* Due date picker */}
           <View>
             <Text className="text-sm font-medium text-gray-700 mb-1.5">
               Due date
             </Text>
-            <TextInput
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-base"
-              placeholder="YYYY-MM-DD  (e.g. 2025-06-10)"
-              placeholderTextColor="#9CA3AF"
-              value={dueDate}
-              onChangeText={setDueDate}
-              keyboardType="numbers-and-punctuation"
-            />
+            <TouchableOpacity
+              className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between"
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+            >
+              <Text className="text-gray-900 text-base">
+                {formatDate(dueDate)}
+              </Text>
+              <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={dueDate}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                minimumDate={new Date()}
+                onChange={(_, selectedDate) => {
+                  setShowDatePicker(Platform.OS === "ios");
+                  if (selectedDate) setDueDate(selectedDate);
+                  if (Platform.OS === "android") setShowDatePicker(false);
+                }}
+              />
+            )}
           </View>
 
           {/* Category */}
@@ -171,9 +218,7 @@ export default function AddBillScreen() {
                       color={selected ? "white" : "#6B7280"}
                     />
                     <Text
-                      className={`text-sm font-medium ${
-                        selected ? "text-white" : "text-gray-600"
-                      }`}
+                      className={`text-sm font-medium ${selected ? "text-white" : "text-gray-600"}`}
                     >
                       {cat.label}
                     </Text>
