@@ -1,5 +1,6 @@
 import { useBills } from "@/hooks/use-bills";
 import { Bill } from "@/lib/database";
+import { cancelBillReminders } from "@/lib/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -32,10 +33,12 @@ export default function HistoryScreen() {
     return b.status === filter;
   });
 
-  function handleTogglePaid(bill: Bill) {
+  async function handleTogglePaid(bill: Bill) {
     if (bill.status === "paid") {
       markAsUnpaid(bill.id);
     } else {
+      // Cancel notifications when marking as paid
+      await cancelBillReminders(bill.notification_id);
       markAsPaid(bill.id);
     }
   }
@@ -49,7 +52,10 @@ export default function HistoryScreen() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => deleteBill(bill.id),
+          onPress: async () => {
+            await cancelBillReminders(bill.notification_id);
+            deleteBill(bill.id);
+          },
         },
       ],
     );
@@ -109,7 +115,6 @@ export default function HistoryScreen() {
                   className="bg-white rounded-2xl p-4 flex-row items-center"
                   style={{ elevation: 1 }}
                 >
-                  {/* Icon */}
                   <View
                     className={`w-11 h-11 rounded-xl items-center justify-center mr-3 ${isPaid ? "bg-green-50" : "bg-indigo-50"}`}
                   >
@@ -120,7 +125,6 @@ export default function HistoryScreen() {
                     />
                   </View>
 
-                  {/* Info */}
                   <View className="flex-1">
                     <Text className="text-gray-900 font-semibold text-base">
                       {bill.biller_name}
@@ -134,7 +138,6 @@ export default function HistoryScreen() {
                     </Text>
                   </View>
 
-                  {/* Amount + status */}
                   <View className="items-end gap-1 mr-2">
                     <Text
                       className={`font-bold text-base ${isPaid ? "text-gray-400" : "text-gray-900"}`}
@@ -155,7 +158,6 @@ export default function HistoryScreen() {
                     </View>
                   </View>
 
-                  {/* Actions */}
                   <View className="gap-2">
                     <TouchableOpacity
                       onPress={() => handleTogglePaid(bill)}
