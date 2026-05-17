@@ -9,7 +9,11 @@ import "react-native-reanimated";
 import "../global.css";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { initDatabase } from "@/lib/database";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+// Init SQLite DB on app start
+initDatabase();
 
 export const unstable_settings = {
   anchor: "(tabs)",
