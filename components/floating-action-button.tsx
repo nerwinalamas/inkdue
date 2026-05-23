@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Pressable,
   Text,
@@ -36,6 +38,55 @@ export default function FloatingActionButton() {
     setTimeout(fn, 150);
   }
 
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Kailangan ng camera permission.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: "images",
+      quality: 0.8,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      // Pagkatapos kumuha ng picture, pumunta sa Add screen na may image
+      router.push({
+        pathname: "/(tabs)/add",
+        params: {
+          mode: "camera",
+          imageUri: result.assets[0].uri,
+        },
+      });
+    }
+  };
+
+  const openGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Kailangan ng gallery permission.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      quality: 0.8,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      router.push({
+        pathname: "/(tabs)/add",
+        params: {
+          mode: "gallery",
+          imageUri: result.assets[0].uri,
+        },
+      });
+    }
+  };
+
   // Order: index 0 = pinakamalapit sa main FAB (pinakababa)
   const actions: Action[] = [
     {
@@ -47,14 +98,12 @@ export default function FloatingActionButton() {
     {
       icon: "image-outline",
       label: "Gallery",
-      onPress: () =>
-        router.push({ pathname: "/(tabs)/add", params: { mode: "gallery" } }),
+      onPress: openGallery,
     },
     {
       icon: "camera-outline",
       label: "Scan bill",
-      onPress: () =>
-        router.push({ pathname: "/(tabs)/add", params: { mode: "camera" } }),
+      onPress: openCamera,
     },
   ];
 
