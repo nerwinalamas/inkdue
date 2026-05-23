@@ -65,17 +65,12 @@ export default function AddBillScreen() {
       if (result.amount) setAmount(result.amount.toString());
       if (result.dueDate) setDueDate(new Date(result.dueDate));
 
-      if (!result.billerName && !result.amount && !result.dueDate) {
-        Alert.alert(
-          "OCR incomplete",
-          "Hindi mabasa ang bill nang maayos. Manu-mano na lang i-fill ang fields.",
-        );
-      } else {
-        Alert.alert(
-          "Bill scanned!",
-          "Na-detect na ang info. I-review at i-update kung may mali.",
-        );
-      }
+      // DEBUG — tanggalin ito pagkatapos ma-fix ang OCR
+      const debugMsg =
+        "Amount: " + result.amount + " ||| " + result.rawText.slice(0, 400);
+      Alert.alert("DEBUG: Raw OCR", debugMsg);
+
+      console.log("result:", result);
     } catch {
       Alert.alert(
         "Error",
