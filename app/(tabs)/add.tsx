@@ -4,9 +4,8 @@ import { scheduleBillReminders } from "@/lib/notifications";
 import { extractBillInfo } from "@/lib/ocr";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -31,6 +30,10 @@ const CATEGORIES = [
 
 export default function AddBillScreen() {
   const router = useRouter();
+  const { imageUri: passedImageUri } = useLocalSearchParams<{
+    imageUri?: string;
+  }>();
+
   const { addBill } = useBills();
 
   const [billerName, setBillerName] = useState("");
@@ -54,7 +57,7 @@ export default function AddBillScreen() {
     return date.toISOString().split("T")[0]; // "2025-06-10"
   }
 
-  async function processImage(uri: string) {
+  const processImage = useCallback(async (uri: string) => {
     setImageUri(uri);
     setScanning(true);
     try {
@@ -79,48 +82,14 @@ export default function AddBillScreen() {
     } finally {
       setScanning(false);
     }
-  }
+  }, []);
 
-  async function handleCamera() {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission needed",
-        "Kailangan ng camera permission para mag-scan.",
-      );
-      return;
+  // Process image passed from FloatingActionButton
+  useEffect(() => {
+    if (passedImageUri) {
+      processImage(passedImageUri);
     }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: "images",
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      await processImage(result.assets[0].uri);
-    }
-  }
-
-  async function handleGallery() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Kailangan ng gallery permission.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      await processImage(result.assets[0].uri);
-    }
-  }
-
-  function handleScanPress() {
-    Alert.alert("Scan a bill", "Piliin ang source ng larawan:", [
-      { text: "Camera", onPress: handleCamera },
-      { text: "Gallery", onPress: handleGallery },
-      { text: "Cancel", style: "cancel" },
-    ]);
-  }
+  }, [passedImageUri, processImage]);
 
   async function handleSave() {
     if (!billerName.trim()) {
@@ -218,37 +187,24 @@ export default function AddBillScreen() {
             />
             <TouchableOpacity
               className="bg-white flex-row items-center justify-center py-3 gap-2"
-              onPress={handleScanPress}
+              onPress={() =>
+                Alert.alert("Change Image", "This feature is coming soon.")
+              }
               activeOpacity={0.7}
             >
               <Ionicons name="refresh-outline" size={18} color="#4F46E5" />
               <Text className="text-indigo-600 font-medium text-sm">
-                Scan a different bill
+                Change Image
               </Text>
             </TouchableOpacity>
           </View>
-        ) : (
-          // Scan placeholder
-          <TouchableOpacity
-            className="mx-5 mb-6 border-2 border-dashed border-indigo-300 rounded-2xl py-6 items-center bg-indigo-50"
-            activeOpacity={0.7}
-            onPress={handleScanPress}
-          >
-            <Ionicons name="camera-outline" size={32} color="#6366F1" />
-            <Text className="text-indigo-600 font-semibold text-base mt-2">
-              Scan a bill
-            </Text>
-            <Text className="text-indigo-400 text-xs mt-1">
-              Camera or photo from gallery
-            </Text>
-          </TouchableOpacity>
-        )}
+        ) : null}
 
         {/* Divider */}
         <View className="flex-row items-center mx-5 mb-6 gap-3">
           <View className="flex-1 h-px bg-gray-200" />
           <Text className="text-gray-400 text-xs">
-            {imageUri ? "review & edit details" : "or enter manually"}
+            {imageUri ? "Review & Edit Details" : "Or Enter Manually"}
           </Text>
           <View className="flex-1 h-px bg-gray-200" />
         </View>
@@ -258,7 +214,7 @@ export default function AddBillScreen() {
           {/* Biller name */}
           <View>
             <Text className="text-sm font-medium text-gray-700 mb-1.5">
-              Biller name
+              Biller Name
             </Text>
             <TextInput
               className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-base"
@@ -287,7 +243,7 @@ export default function AddBillScreen() {
           {/* Due date picker */}
           <View>
             <Text className="text-sm font-medium text-gray-700 mb-1.5">
-              Due date
+              Due Date
             </Text>
             <TouchableOpacity
               className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between"
@@ -374,12 +330,12 @@ export default function AddBillScreen() {
 
           {/* Save button */}
           <TouchableOpacity
-            className="bg-indigo-600 rounded-2xl py-4 items-center mt-2"
+            className="bg-indigo-600 rounded-2xl py-4 items-center mt-4"
             activeOpacity={0.8}
             onPress={handleSave}
           >
             <Text className="text-white font-semibold text-base">
-              Save bill
+              Save Bill
             </Text>
           </TouchableOpacity>
         </View>
