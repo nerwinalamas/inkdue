@@ -37,10 +37,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="add"
           options={{
-            title: "Add Bill",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="add-circle-outline" size={size} color={color} />
-            ),
+            href: null,
           }}
         />
         <Tabs.Screen
