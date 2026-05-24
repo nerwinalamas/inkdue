@@ -1,15 +1,17 @@
+import Header from "@/components/header";
 import { useBills } from "@/hooks/use-bills";
+import { CATEGORIES } from "@/lib/constant";
 import { updateBill } from "@/lib/database";
+import { formatDate } from "@/lib/formatDate";
 import { scheduleBillReminders } from "@/lib/notifications";
 import { extractBillInfo } from "@/lib/ocr";
+import { toISODate } from "@/lib/toISODate";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
-  Image,
   Platform,
   ScrollView,
   Text,
@@ -18,15 +20,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const CATEGORIES = [
-  { id: "electricity", label: "Electricity", icon: "flash-outline" },
-  { id: "water", label: "Water", icon: "water-outline" },
-  { id: "internet", label: "Internet", icon: "wifi-outline" },
-  { id: "mobile", label: "Mobile", icon: "phone-portrait-outline" },
-  { id: "rent", label: "Rent", icon: "home-outline" },
-  { id: "other", label: "Other", icon: "receipt-outline" },
-];
 
 export default function AddBillScreen() {
   const router = useRouter();
@@ -43,23 +36,9 @@ export default function AddBillScreen() {
   const [category, setCategory] = useState("electricity");
   const [notes, setNotes] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [scanning, setScanning] = useState(false);
-
-  function formatDate(date: Date) {
-    return date.toLocaleDateString("en-PH", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
-
-  function toISODate(date: Date) {
-    return date.toISOString().split("T")[0]; // "2025-06-10"
-  }
 
   const processImage = useCallback(async (uri: string) => {
     setImageUri(uri);
-    setScanning(true);
     try {
       const result = await extractBillInfo(uri);
 
@@ -79,8 +58,6 @@ export default function AddBillScreen() {
         "Error",
         "Hindi na-scan ang bill. Subukan ulit o manual na i-type.",
       );
-    } finally {
-      setScanning(false);
     }
   }, []);
 
@@ -158,56 +135,10 @@ export default function AddBillScreen() {
         contentContainerStyle={{ paddingBottom: 48 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <View className="px-5 pt-6 pb-4">
-          <Text className="text-2xl font-bold text-gray-900">Add Bill</Text>
-          <Text className="text-sm text-gray-500 mt-1">
-            Scan or enter your bill manually.
-          </Text>
-        </View>
-
-        {/* Scan card */}
-        {scanning ? (
-          <View className="mx-5 mb-6 rounded-2xl bg-indigo-50 py-8 items-center gap-3">
-            <ActivityIndicator size="large" color="#4F46E5" />
-            <Text className="text-indigo-600 font-medium">
-              Scanning bill...
-            </Text>
-          </View>
-        ) : imageUri ? (
-          // Show scanned image preview
-          <View
-            className="mx-5 mb-6 rounded-2xl overflow-hidden"
-            style={{ elevation: 1 }}
-          >
-            <Image
-              source={{ uri: imageUri }}
-              style={{ width: "100%", height: 180 }}
-              resizeMode="cover"
-            />
-            <TouchableOpacity
-              className="bg-white flex-row items-center justify-center py-3 gap-2"
-              onPress={() =>
-                Alert.alert("Change Image", "This feature is coming soon.")
-              }
-              activeOpacity={0.7}
-            >
-              <Ionicons name="refresh-outline" size={18} color="#4F46E5" />
-              <Text className="text-indigo-600 font-medium text-sm">
-                Change Image
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-
-        {/* Divider */}
-        <View className="flex-row items-center mx-5 mb-6 gap-3">
-          <View className="flex-1 h-px bg-gray-200" />
-          <Text className="text-gray-400 text-xs">
-            {imageUri ? "Review & Edit Details" : "Or Enter Manually"}
-          </Text>
-          <View className="flex-1 h-px bg-gray-200" />
-        </View>
+        <Header
+          title="Add Bill"
+          subtitle="Fill in the details or scan another bill."
+        />
 
         {/* Form */}
         <View className="px-5 gap-4">
