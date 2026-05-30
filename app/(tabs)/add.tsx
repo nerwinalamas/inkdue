@@ -21,26 +21,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const CATEGORY_COLORS: Record<
-  string,
-  { bg: string; icon: string; selectedBg: string }
-> = {
-  electricity: {
-    bg: "bg-yellow-50",
-    icon: "#F59E0B",
-    selectedBg: "bg-yellow-500",
-  },
-  water: { bg: "bg-blue-50", icon: "#3B82F6", selectedBg: "bg-blue-500" },
-  internet: {
-    bg: "bg-purple-50",
-    icon: "#8B5CF6",
-    selectedBg: "bg-purple-500",
-  },
-  mobile: { bg: "bg-green-50", icon: "#10B981", selectedBg: "bg-green-500" },
-  rent: { bg: "bg-orange-50", icon: "#F97316", selectedBg: "bg-orange-500" },
-  other: { bg: "bg-gray-100", icon: "#6B7280", selectedBg: "bg-gray-500" },
-};
-
 export default function AddBillScreen() {
   const router = useRouter();
   const { imageUri: passedImageUri } = useLocalSearchParams<{
@@ -164,11 +144,11 @@ export default function AddBillScreen() {
             <View className="bg-white rounded-2xl overflow-hidden">
               {/* Biller Name */}
               <View className="px-4 py-3 flex-row items-center">
-                <View className="w-8 h-8 rounded-lg bg-blue-50 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-lg bg-gray-100 items-center justify-center mr-3">
                   <Ionicons
                     name="storefront-outline"
                     size={16}
-                    color="#3B82F6"
+                    color="#6C6C70"
                   />
                 </View>
                 <View className="flex-1">
@@ -190,8 +170,8 @@ export default function AddBillScreen() {
 
               {/* Amount */}
               <View className="px-4 py-3 flex-row items-center">
-                <View className="w-8 h-8 rounded-lg bg-green-50 items-center justify-center mr-3">
-                  <Ionicons name="cash-outline" size={16} color="#10B981" />
+                <View className="w-8 h-8 rounded-lg bg-gray-100 items-center justify-center mr-3">
+                  <Ionicons name="cash-outline" size={16} color="#6C6C70" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-[11px] text-[#8E8E93] font-medium mb-0.5">
@@ -217,8 +197,8 @@ export default function AddBillScreen() {
                 activeOpacity={0.6}
                 className="px-4 py-3 flex-row items-center"
               >
-                <View className="w-8 h-8 rounded-lg bg-red-50 items-center justify-center mr-3">
-                  <Ionicons name="calendar-outline" size={16} color="#EF4444" />
+                <View className="w-8 h-8 rounded-lg bg-gray-100 items-center justify-center mr-3">
+                  <Ionicons name="calendar-outline" size={16} color="#6C6C70" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-[11px] text-[#8E8E93] font-medium mb-0.5">
@@ -258,28 +238,23 @@ export default function AddBillScreen() {
             >
               {CATEGORIES.map((cat) => {
                 const selected = category === cat.id;
-                const colors = CATEGORY_COLORS[cat.id] ?? CATEGORY_COLORS.other;
                 return (
                   <TouchableOpacity
                     key={cat.id}
                     onPress={() => setCategory(cat.id)}
                     activeOpacity={0.7}
                     className={`flex-row items-center gap-2 px-4 py-2.5 rounded-2xl ${
-                      selected ? colors.selectedBg : "bg-white"
+                      selected
+                        ? "bg-gray-100 border border-gray-300"
+                        : "bg-white"
                     }`}
                   >
                     <Ionicons
                       name={cat.icon as any}
                       size={15}
-                      color={selected ? "white" : colors.icon}
+                      color="#6C6C70"
                     />
-                    <Text
-                      className={`text-[14px] font-medium ${
-                        selected ? "text-white" : "text-[#1C1C1E]"
-                      }`}
-                    >
-                      {cat.label}
-                    </Text>
+                    <Text className="text-sm font-medium">{cat.label}</Text>
                   </TouchableOpacity>
                 );
               })}
