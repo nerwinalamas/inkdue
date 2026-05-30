@@ -3,8 +3,9 @@ import { useBills } from "@/hooks/use-bills";
 import { Bill } from "@/lib/database";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { useCallback } from "react";
-import { SectionList, Text, View } from "react-native";
+import { SectionList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -40,6 +41,7 @@ function groupBillsByMonth(bills: Bill[]) {
 
 export default function HistoryScreen() {
   const { bills, refresh } = useBills();
+  const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
@@ -104,7 +106,9 @@ export default function HistoryScreen() {
 
           return (
             <View className="px-5">
-              <View
+              <TouchableOpacity
+                activeOpacity={0.6}
+                onPress={() => router.push(`/(tabs)/bill/${bill.id}`)}
                 className={`bg-white ${borderRadius} px-4 flex-row items-center`}
                 style={{ minHeight: 68 }}
               >
@@ -140,7 +144,7 @@ export default function HistoryScreen() {
                     minimumFractionDigits: 2,
                   })}
                 </Text>
-              </View>
+              </TouchableOpacity>
 
               {/* iOS-style inset divider — hide after last item */}
               {!isLast && (

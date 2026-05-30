@@ -61,6 +61,7 @@ export default function TabLayout() {
             href: null,
           }}
         />
+        <Tabs.Screen name="bill/[id]" options={{ href: null }} />
       </Tabs>
 
       {showFAB && <FloatingActionButton />}
