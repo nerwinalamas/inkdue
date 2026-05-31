@@ -210,8 +210,16 @@ export default function BillDetailScreen() {
               icon="receipt-outline"
               label="Status"
               value={status.label}
-              isLast
+              isLast={!bill.notes}
             />
+            {bill.notes && (
+              <InfoRow
+                icon="document-text-outline"
+                label="Notes"
+                value={bill.notes}
+                isLast
+              />
+            )}
           </View>
         </View>
 
