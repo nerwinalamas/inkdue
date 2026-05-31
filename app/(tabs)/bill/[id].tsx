@@ -158,7 +158,11 @@ export default function BillDetailScreen() {
         <Text className="flex-1 text-center text-[17px] font-semibold text-[#1C1C1E]">
           Bill Details
         </Text>
-        <View style={{ width: 64 }} />
+        <TouchableOpacity
+          onPress={() => router.push(`/(tabs)/bill/edit/${bill.id}`)}
+        >
+          <Text className="text-[17px] text-[#0A84FF]">Edit</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
