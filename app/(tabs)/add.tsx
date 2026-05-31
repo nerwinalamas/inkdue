@@ -15,8 +15,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddBillScreen() {
   const router = useRouter();
-  const { imageUri: passedImageUri } = useLocalSearchParams<{
+  const { imageUri: passedImageUri, mode } = useLocalSearchParams<{
     imageUri?: string;
+    mode?: "manual" | "camera" | "gallery";
   }>();
 
   const { addBill } = useBills();
@@ -76,6 +77,7 @@ export default function AddBillScreen() {
       category: values.category,
       image_uri: imageUri,
       notes: values.notes.trim() || null,
+      source: mode ?? "manual",
       notification_id: null,
     });
 

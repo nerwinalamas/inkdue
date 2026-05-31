@@ -14,6 +14,7 @@ export type Bill = {
   status: BillStatus;
   category: string;
   image_uri: string | null;
+  source: "manual" | "camera" | "gallery" | null;
   notes: string | null;
   created_at: string;
   notification_id: string | null;
@@ -28,6 +29,10 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   {
     name: "001_add_notes",
     sql: "ALTER TABLE bills ADD COLUMN notes TEXT",
+  },
+  {
+    name: "002_add_source",
+    sql: "ALTER TABLE bills ADD COLUMN source TEXT",
   },
 ];
 
@@ -70,6 +75,7 @@ export function initDatabase() {
       category        TEXT    NOT NULL DEFAULT 'other',
       image_uri       TEXT,
       notes           TEXT,
+      source          TEXT,
       created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
       notification_id TEXT
     );
@@ -106,8 +112,8 @@ export function getBillById(id: number): Bill | null {
 
 export function addBill(bill: NewBill): number {
   const result = db.runSync(
-    `INSERT INTO bills (biller_name, amount, due_date, status, category, image_uri, notes, notification_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO bills (biller_name, amount, due_date, status, category, image_uri, notes, source, notification_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       bill.biller_name,
       bill.amount,
@@ -116,6 +122,7 @@ export function addBill(bill: NewBill): number {
       bill.category ?? "other",
       bill.image_uri ?? null,
       bill.notes ?? null,
+      bill.source ?? null,
       bill.notification_id ?? null,
     ],
   );
