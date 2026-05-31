@@ -84,6 +84,7 @@ export default function AddBillScreen() {
       status: "unpaid",
       category,
       image_uri: imageUri,
+      notes: notes.trim() || null,
       notification_id: null,
     });
 
