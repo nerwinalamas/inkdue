@@ -1,3 +1,4 @@
+import NavBar from "@/components/nav-bar";
 import { CATEGORIES } from "@/lib/constant";
 import {
   Bill,
@@ -145,25 +146,14 @@ export default function BillDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F2F2F7]">
-      {/* Nav bar */}
-      <View className="flex-row items-center px-4 py-3">
-        <TouchableOpacity
-          onPress={() => router.push("/(tabs)/history")}
-          activeOpacity={0.6}
-          className="flex-row items-center"
-        >
-          <Ionicons name="chevron-back" size={20} color="#0A84FF" />
-          <Text className="text-[17px] text-[#0A84FF] ml-0.5">Back</Text>
-        </TouchableOpacity>
-        <Text className="flex-1 text-center text-[17px] font-semibold text-[#1C1C1E]">
-          Bill Details
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push(`/(tabs)/bill/edit/${bill.id}`)}
-        >
-          <Text className="text-[17px] text-[#0A84FF]">Edit</Text>
-        </TouchableOpacity>
-      </View>
+      <NavBar
+        title="Bill Details"
+        left={{ label: "Back", onPress: () => router.push("/(tabs)/history") }}
+        right={{
+          label: "Edit",
+          onPress: () => router.push(`/(tabs)/bill/edit/${bill.id}`),
+        }}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

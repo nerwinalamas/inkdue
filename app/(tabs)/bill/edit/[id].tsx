@@ -2,13 +2,13 @@ import BillForm, {
   BillFormValues,
   getDefaultBillValues,
 } from "@/components/bill-form";
+import NavBar from "@/components/nav-bar";
 import { getBillById, updateBill } from "@/lib/database";
 import { scheduleBillReminders } from "@/lib/notifications";
 import { toISODate } from "@/lib/toISODate";
-import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditBillScreen() {
@@ -106,25 +106,14 @@ export default function EditBillScreen() {
         contentContainerStyle={{ paddingBottom: 48 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Nav bar */}
-        <View className="flex-row items-center px-4 py-3">
-          <TouchableOpacity
-            onPress={() => router.push(`/(tabs)/bill/${id}`)}
-            activeOpacity={0.6}
-            className="flex-row items-center"
-          >
-            <Ionicons name="chevron-back" size={20} color="#0A84FF" />
-            <Text className="text-[17px] text-[#0A84FF] ml-0.5">Back</Text>
-          </TouchableOpacity>
-          <Text className="flex-1 text-center text-[17px] font-semibold text-[#1C1C1E]">
-            Edit Bill
-          </Text>
-          <TouchableOpacity onPress={handleSave} activeOpacity={0.6}>
-            <Text className="text-[17px] text-[#0A84FF] font-semibold">
-              Save
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <NavBar
+          title="Edit Bill"
+          left={{
+            label: "Back",
+            onPress: () => router.push(`/(tabs)/bill/${id}`),
+          }}
+          right={{ label: "Save", bold: true, onPress: handleSave }}
+        />
 
         <BillForm values={values} onChange={setValues} />
 
