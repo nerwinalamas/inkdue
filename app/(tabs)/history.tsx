@@ -95,6 +95,7 @@ export default function HistoryScreen() {
           const isFirst = index === 0;
           const isLast = index === section.data.length - 1;
           const isOnly = section.data.length === 1;
+          const isPaid = bill.status === "paid";
 
           const borderRadius = isOnly
             ? "rounded-2xl"
@@ -127,14 +128,27 @@ export default function HistoryScreen() {
                   >
                     {bill.biller_name}
                   </Text>
-                  <Text className="text-[13px] text-[#8E8E93] mt-0.5">
-                    Due{" "}
-                    {new Date(bill.due_date).toLocaleDateString("en-PH", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </Text>
+                  {isPaid ? (
+                    <View className="flex-row items-center gap-1 mt-0.5">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={13}
+                        color="#16A34A"
+                      />
+                      <Text className="text-[13px] text-green-600 font-medium">
+                        Paid
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text className="text-[13px] text-[#8E8E93] mt-0.5">
+                      Due{" "}
+                      {new Date(bill.due_date).toLocaleDateString("en-PH", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  )}
                 </View>
 
                 {/* Amount */}
