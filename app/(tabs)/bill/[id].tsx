@@ -287,7 +287,7 @@ export default function BillDetailScreen() {
           onRequestClose={() => setShowImage(false)}
         >
           <Pressable
-            className="flex-1 bg-black/90 items-center justify-center"
+            className="flex-1 bg-black items-center justify-center"
             onPress={() => setShowImage(false)}
           >
             <Image
@@ -296,7 +296,7 @@ export default function BillDetailScreen() {
               style={{ aspectRatio: 3 / 4 }}
               resizeMode="contain"
             />
-            <Text className="text-white/60 text-[13px] mt-4">
+            <Text className="text-white/70 text-[13px] mt-6">
               Tap anywhere to close
             </Text>
           </Pressable>
