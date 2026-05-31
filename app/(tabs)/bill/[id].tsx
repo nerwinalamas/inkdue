@@ -11,7 +11,16 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -88,6 +97,7 @@ export default function BillDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [bill, setBill] = useState<Bill | null>(null);
+  const [showImage, setShowImage] = useState(false);
 
   const load = useCallback(() => {
     if (id) setBill(getBillById(Number(id)));
@@ -250,7 +260,48 @@ export default function BillDetailScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* View scanned image */}
+        {bill.image_uri && bill.source !== "manual" && (
+          <View className="mx-5 mt-3">
+            <TouchableOpacity
+              className="bg-white rounded-2xl py-4 items-center flex-row justify-center gap-2"
+              activeOpacity={0.7}
+              onPress={() => setShowImage(true)}
+            >
+              <Ionicons name="image-outline" size={18} color="#0A84FF" />
+              <Text className="text-[17px] font-semibold text-[#0A84FF]">
+                View Scanned Image
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
+
+      {/* Image viewer modal */}
+      {bill.image_uri && (
+        <Modal
+          visible={showImage}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowImage(false)}
+        >
+          <Pressable
+            className="flex-1 bg-black/90 items-center justify-center"
+            onPress={() => setShowImage(false)}
+          >
+            <Image
+              source={{ uri: bill.image_uri }}
+              className="w-full"
+              style={{ aspectRatio: 3 / 4 }}
+              resizeMode="contain"
+            />
+            <Text className="text-white/60 text-[13px] mt-4">
+              Tap anywhere to close
+            </Text>
+          </Pressable>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
