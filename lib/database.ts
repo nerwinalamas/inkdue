@@ -14,11 +14,48 @@ export type Bill = {
   status: BillStatus;
   category: string;
   image_uri: string | null;
+  notes: string | null;
   created_at: string;
   notification_id: string | null;
 };
 
 export type NewBill = Omit<Bill, "id" | "created_at">;
+
+// ─── Migrations ───────────────────────────────────────────────────────────────
+
+const MIGRATIONS: { name: string; sql: string }[] = [
+  // Add new migrations here — never edit or delete existing ones
+  {
+    name: "001_add_notes",
+    sql: "ALTER TABLE bills ADD COLUMN notes TEXT",
+  },
+];
+
+function runMigrations() {
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS migrations (
+      id     INTEGER PRIMARY KEY AUTOINCREMENT,
+      name   TEXT    NOT NULL UNIQUE,
+      run_at TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+
+  for (const migration of MIGRATIONS) {
+    const already = db.getFirstSync(
+      "SELECT id FROM migrations WHERE name = ?",
+      [migration.name],
+    );
+    if (!already) {
+      try {
+        db.execSync(migration.sql);
+      } catch (e) {
+        // Column/table may already exist on fresh installs — safe to ignore
+        console.warn(`Migration "${migration.name}" skipped:`, e);
+      }
+      db.runSync("INSERT INTO migrations (name) VALUES (?)", [migration.name]);
+    }
+  }
+}
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
@@ -32,6 +69,7 @@ export function initDatabase() {
       status          TEXT    NOT NULL DEFAULT 'unpaid',
       category        TEXT    NOT NULL DEFAULT 'other',
       image_uri       TEXT,
+      notes           TEXT,
       created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
       notification_id TEXT
     );
@@ -44,6 +82,8 @@ export function initDatabase() {
       note        TEXT
     );
   `);
+
+  runMigrations();
 }
 
 // ─── Bills CRUD ───────────────────────────────────────────────────────────────
@@ -66,8 +106,8 @@ export function getBillById(id: number): Bill | null {
 
 export function addBill(bill: NewBill): number {
   const result = db.runSync(
-    `INSERT INTO bills (biller_name, amount, due_date, status, category, image_uri, notification_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO bills (biller_name, amount, due_date, status, category, image_uri, notes, notification_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       bill.biller_name,
       bill.amount,
@@ -75,6 +115,7 @@ export function addBill(bill: NewBill): number {
       bill.status ?? "unpaid",
       bill.category ?? "other",
       bill.image_uri ?? null,
+      bill.notes ?? null,
       bill.notification_id ?? null,
     ],
   );
