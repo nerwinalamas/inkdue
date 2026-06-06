@@ -1,110 +1,232 @@
+import Header from "@/components/header";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type SettingItem = {
-  label: string;
-  icon: string;
-  value?: string;
-  onPress?: () => void;
+type RowIcon = {
+  name: string;
+  bg: string;
+  color: string;
 };
 
-const SETTING_GROUPS: { title: string; items: SettingItem[] }[] = [
-  {
-    title: "Notifications",
-    items: [
-      {
-        label: "Reminder timing",
-        icon: "notifications-outline",
-        value: "3 days, 1 day, day-of",
-      },
-      {
-        label: "Notification sound",
-        icon: "volume-medium-outline",
-        value: "Default",
-      },
-    ],
-  },
-  {
-    title: "Display",
-    items: [
-      { label: "Currency", icon: "cash-outline", value: "PHP (₱)" },
-      { label: "Date format", icon: "calendar-outline", value: "MM/DD/YYYY" },
-    ],
-  },
-  {
-    title: "Data",
-    items: [
-      { label: "Export to CSV", icon: "download-outline" },
-      { label: "Clear all data", icon: "trash-outline" },
-    ],
-  },
-  {
-    title: "About",
-    items: [
-      { label: "Version", icon: "information-circle-outline", value: "1.0.0" },
-    ],
-  },
-];
+function SectionLabel({ title }: { title: string }) {
+  return (
+    <Text className="text-[12px] font-semibold text-[#8E8E93] uppercase tracking-widest px-4 mb-2 ml-1">
+      {title}
+    </Text>
+  );
+}
+
+function SettingsGroup({ children }: { children: React.ReactNode }) {
+  return (
+    <View className="mx-5 bg-white rounded-2xl overflow-hidden mb-4">
+      {children}
+    </View>
+  );
+}
+
+function RowDivider() {
+  return (
+    <View className="bg-white">
+      <View className="ml-14 h-[0.5px] bg-[#E5E5EA]" />
+    </View>
+  );
+}
+
+function ToggleRow({
+  icon,
+  label,
+  value,
+  onValueChange,
+}: {
+  icon: RowIcon;
+  label: string;
+  value: boolean;
+  onValueChange: (v: boolean) => void;
+}) {
+  return (
+    <View className="flex-row items-center px-4 py-2 min-h-12.5 gap-3">
+      <View
+        className="w-7.5 h-7.5 rounded-lg items-center justify-center"
+        style={{ backgroundColor: icon.bg }}
+      >
+        <Ionicons name={icon.name as any} size={16} color={icon.color} />
+      </View>
+      <Text className="flex-1 text-[16px] text-[#1C1C1E]">{label}</Text>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: "#E5E5EA", true: "#34C759" }}
+        thumbColor="white"
+        ios_backgroundColor="#E5E5EA"
+      />
+    </View>
+  );
+}
+
+function ChevronRow({
+  icon,
+  label,
+  value,
+  onPress,
+  destructive = false,
+}: {
+  icon: RowIcon;
+  label: string;
+  value?: string;
+  onPress: () => void;
+  destructive?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      className="flex-row items-center px-4 py-2 min-h-12.5 gap-3"
+      activeOpacity={0.6}
+      onPress={onPress}
+    >
+      <View
+        className="w-7.5 h-7.5 rounded-lg items-center justify-center"
+        style={{ backgroundColor: icon.bg }}
+      >
+        <Ionicons name={icon.name as any} size={16} color={icon.color} />
+      </View>
+      <Text
+        className={`flex-1 text-[16px] ${destructive ? "text-[#FF3B30]" : "text-[#1C1C1E]"}`}
+      >
+        {label}
+      </Text>
+      {value && (
+        <Text className="text-[15px] text-[#8E8E93] mr-1">{value}</Text>
+      )}
+      {!destructive && (
+        <Ionicons name="chevron-forward" size={16} color="#C7C7CC" />
+      )}
+    </TouchableOpacity>
+  );
+}
 
 export default function SettingsScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-[#F2F2F7]">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Header */}
-        <View className="px-5 pt-6 pb-4">
-          <Text className="text-2xl font-bold text-gray-900">Settings</Text>
+        <Header title="Settings" />
+
+        {/* Notifications */}
+        <View className="my-1">
+          <SectionLabel title="Notifications" />
+          <SettingsGroup>
+            <ToggleRow
+              icon={{
+                name: "notifications-outline",
+                bg: "#0A84FF",
+                color: "white",
+              }}
+              label="Bill reminders"
+              value={true}
+              onValueChange={() => {}}
+            />
+            <RowDivider />
+            <ChevronRow
+              icon={{ name: "time-outline", bg: "#FF9500", color: "white" }}
+              label="Remind me before"
+              value="3 days"
+              onPress={() => {}}
+            />
+            <RowDivider />
+            <ToggleRow
+              icon={{
+                name: "alert-circle-outline",
+                bg: "#AF52DE",
+                color: "white",
+              }}
+              label="Overdue alerts"
+              value={true}
+              onValueChange={() => {}}
+            />
+          </SettingsGroup>
         </View>
 
-        <View className="px-5 gap-6">
-          {SETTING_GROUPS.map((group) => (
-            <View key={group.title}>
-              <Text className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                {group.title}
-              </Text>
-              <View
-                className="bg-white rounded-2xl overflow-hidden"
-                style={{ elevation: 1 }}
-              >
-                {group.items.map((item, idx) => (
-                  <TouchableOpacity
-                    key={item.label}
-                    className={`flex-row items-center px-4 py-3.5 ${
-                      idx < group.items.length - 1
-                        ? "border-b border-gray-100"
-                        : ""
-                    }`}
-                    activeOpacity={0.6}
-                    onPress={item.onPress}
-                  >
-                    <View className="w-8 h-8 rounded-lg bg-indigo-50 items-center justify-center mr-3">
-                      <Ionicons
-                        name={item.icon as any}
-                        size={18}
-                        color="#4F46E5"
-                      />
-                    </View>
-                    <Text className="flex-1 text-gray-800 text-sm font-medium">
-                      {item.label}
-                    </Text>
-                    {item.value ? (
-                      <Text className="text-gray-400 text-sm mr-1">
-                        {item.value}
-                      </Text>
-                    ) : null}
-                    <Ionicons
-                      name="chevron-forward"
-                      size={16}
-                      color="#D1D5DB"
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          ))}
+        {/* Appearance */}
+        <View className="mb-1">
+          <SectionLabel title="Appearance" />
+          <SettingsGroup>
+            <ToggleRow
+              icon={{ name: "moon-outline", bg: "#8E8E93", color: "white" }}
+              label="Dark mode"
+              value={false}
+              onValueChange={() => {}}
+            />
+            <RowDivider />
+            <ChevronRow
+              icon={{ name: "cash-outline", bg: "#32ADE6", color: "white" }}
+              label="Currency"
+              value="₱ PHP"
+              onPress={() => {}}
+            />
+          </SettingsGroup>
+        </View>
+
+        {/* Data */}
+        <View className="mb-1">
+          <SectionLabel title="Data" />
+          <SettingsGroup>
+            <ChevronRow
+              icon={{ name: "download-outline", bg: "#34C759", color: "white" }}
+              label="Export bills"
+              onPress={() => {}}
+            />
+            <RowDivider />
+            <ChevronRow
+              icon={{
+                name: "cloud-upload-outline",
+                bg: "#0A84FF",
+                color: "white",
+              }}
+              label="Import bills"
+              onPress={() => {}}
+            />
+          </SettingsGroup>
+        </View>
+
+        {/* About */}
+        <View className="mb-1">
+          <SectionLabel title="About" />
+          <SettingsGroup>
+            <ChevronRow
+              icon={{
+                name: "information-circle-outline",
+                bg: "#8E8E93",
+                color: "white",
+              }}
+              label="Version"
+              value="1.0.0"
+              onPress={() => {}}
+            />
+            <RowDivider />
+            <ChevronRow
+              icon={{
+                name: "document-text-outline",
+                bg: "#8E8E93",
+                color: "white",
+              }}
+              label="Privacy policy"
+              onPress={() => {}}
+            />
+          </SettingsGroup>
+        </View>
+
+        {/* Danger */}
+        <View className="mb-1">
+          <SettingsGroup>
+            <ChevronRow
+              icon={{ name: "trash-outline", bg: "#FF3B30", color: "white" }}
+              label="Delete all bills"
+              onPress={() => {}}
+              destructive
+            />
+          </SettingsGroup>
         </View>
       </ScrollView>
     </SafeAreaView>
