@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -22,6 +22,15 @@ export default function FloatingActionButton() {
   const router = useRouter();
   const animation = useRef(new Animated.Value(0)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  // Reset FAB when tab regains focus
+  useFocusEffect(
+    useCallback(() => {
+      setOpen(false);
+      animation.setValue(0);
+      backdropOpacity.setValue(0);
+    }, [animation, backdropOpacity]),
+  );
 
   function toggle() {
     const toValue = open ? 0 : 1;
@@ -44,7 +53,7 @@ export default function FloatingActionButton() {
 
   function handleAction(fn: () => void) {
     toggle();
-    setTimeout(fn, 150);
+    setTimeout(fn, 180);
   }
 
   const openCamera = async () => {
@@ -58,7 +67,7 @@ export default function FloatingActionButton() {
       quality: 0.8,
       allowsEditing: true,
     });
-    if (!result.canceled && result.assets[0]) {
+    if (!result.canceled && result.assets?.[0]) {
       router.push({
         pathname: "/(tabs)/add",
         params: { mode: "camera", imageUri: result.assets[0].uri },
@@ -77,7 +86,7 @@ export default function FloatingActionButton() {
       quality: 0.8,
       allowsEditing: true,
     });
-    if (!result.canceled && result.assets[0]) {
+    if (!result.canceled && result.assets?.[0]) {
       router.push({
         pathname: "/(tabs)/add",
         params: { mode: "gallery", imageUri: result.assets[0].uri },
@@ -137,36 +146,39 @@ export default function FloatingActionButton() {
           });
 
           const opacity = animation.interpolate({
-            inputRange: [0, 0.25 + index * 0.08, 1],
+            inputRange: [0, 0.3 + index * 0.08, 1],
             outputRange: [0, 0, 1],
           });
 
           const scale = animation.interpolate({
             inputRange: [0, 1],
-            outputRange: [0.7, 1],
+            outputRange: [0.6, 1],
           });
 
           return (
             <Animated.View
               key={action.label}
               className="absolute bottom-0 right-0"
-              style={{ transform: [{ translateY }, { scale }], opacity }}
+              style={{
+                transform: [{ translateY }, { scale }],
+                opacity,
+              }}
               pointerEvents={open ? "auto" : "none"}
             >
-              {/* Label pill — absolute so it doesn't affect button layout */}
-              <View className="absolute right-14 top-0 bottom-0 justify-center items-center pr-2">
-                <Text className="text-[13px] min-w-20 text-right font-medium text-gray-800 tracking-tight">
+              {/* Label */}
+              <View className="absolute right-16 top-0 bottom-0 justify-center items-center pr-3">
+                <Text className="text-[13px] min-w-27.5 text-right font-medium text-gray-800 tracking-tight">
                   {action.label}
                 </Text>
               </View>
 
-              {/* Mini button — always perfectly circular */}
+              {/* Mini button */}
               <TouchableOpacity
                 onPress={() => handleAction(action.onPress)}
                 activeOpacity={0.75}
                 className="w-14 h-14 rounded-full bg-[#0A84FF] items-center justify-center shadow-lg shadow-[#0A84FF]/40"
               >
-                <Ionicons name={action.icon as any} size={20} color="white" />
+                <Ionicons name={action.icon as any} size={22} color="white" />
               </TouchableOpacity>
             </Animated.View>
           );
@@ -180,7 +192,7 @@ export default function FloatingActionButton() {
             className="w-16 h-16 rounded-full bg-[#0A84FF] items-center justify-center shadow-xl shadow-[#0A84FF]/50"
           >
             <Animated.View style={{ transform: [{ rotate: rotation }] }}>
-              <Ionicons name="add" size={30} color="white" />
+              <Ionicons name="add" size={32} color="white" />
             </Animated.View>
           </TouchableOpacity>
         </Animated.View>
