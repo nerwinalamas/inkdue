@@ -94,7 +94,10 @@ function InfoRow({
 }
 
 export default function BillDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, source } = useLocalSearchParams<{
+    id: string;
+    source?: string;
+  }>();
   const router = useRouter();
   const [bill, setBill] = useState<Bill | null>(null);
   const [showImage, setShowImage] = useState(false);
@@ -158,7 +161,11 @@ export default function BillDetailScreen() {
     <SafeAreaView className="flex-1 bg-[#F2F2F7]">
       <NavBar
         title="Bill Details"
-        left={{ label: "Back", onPress: () => router.push("/(tabs)/history") }}
+        left={{
+          label: "Back",
+          onPress: () =>
+            router.push(source === "dashboard" ? "/(tabs)" : "/(tabs)/history"),
+        }}
         right={{
           label: "Edit",
           onPress: () => router.push(`/(tabs)/bill/edit/${bill.id}`),
