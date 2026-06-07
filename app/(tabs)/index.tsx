@@ -28,7 +28,7 @@ export default function DashboardScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-[#F2F2F7] items-center justify-center">
+      <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black items-center justify-center">
         <ActivityIndicator size="large" color="#0A84FF" />
       </SafeAreaView>
     );
@@ -44,7 +44,7 @@ export default function DashboardScreen() {
   }).length;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F7]">
+    <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 48 }}
@@ -57,7 +57,7 @@ export default function DashboardScreen() {
         {/* Summary cards */}
         <View className="flex-row gap-3 px-5 mb-6">
           <View
-            className="flex-1 bg-white rounded-2xl px-5 py-4"
+            className="flex-1 bg-white dark:bg-[#1C1C1E] rounded-2xl px-5 py-4"
             style={{ borderWidth: 0.5, borderColor: "#E5E5EA" }}
           >
             <Text className="text-[12px] text-[#8E8E93] uppercase tracking-widest mb-3">
@@ -80,14 +80,14 @@ export default function DashboardScreen() {
           </View>
 
           <View
-            className="flex-1 bg-white rounded-2xl px-5 py-4"
+            className="flex-1 bg-white dark:bg-[#1C1C1E] rounded-2xl px-5 py-4"
             style={{ borderWidth: 0.5, borderColor: "#E5E5EA" }}
           >
             <Text className="text-[12px] text-[#8E8E93] uppercase tracking-widest mb-3">
               This week
             </Text>
             <Text
-              className="text-[32px] font-bold text-[#1C1C1E]"
+              className="text-[32px] font-bold text-[#1C1C1E] dark:text-white"
               style={{ letterSpacing: -1 }}
             >
               {dueSoonCount}
@@ -101,14 +101,14 @@ export default function DashboardScreen() {
         {/* Empty state */}
         {unpaidBills.length === 0 && (
           <View className="items-center py-24 px-8">
-            <View className="w-20 h-20 rounded-full bg-white items-center justify-center mb-4">
+            <View className="w-20 h-20 rounded-full bg-white dark:bg-[#1C1C1E] items-center justify-center mb-4">
               <Ionicons
                 name="checkmark-circle-outline"
                 size={36}
                 color="#C7C7CC"
               />
             </View>
-            <Text className="text-[17px] font-semibold text-[#1C1C1E] mb-1">
+            <Text className="text-[17px] font-semibold text-[#1C1C1E] dark:text-white mb-1">
               All clear!
             </Text>
             <Text className="text-[15px] text-[#8E8E93] text-center">

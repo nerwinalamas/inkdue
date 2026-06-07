@@ -21,7 +21,7 @@ export default function HistoryScreen() {
   const sections = groupBillsByMonth(bills);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F7]">
+    <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black">
       <SectionList
         sections={sections}
         showsVerticalScrollIndicator={false}
@@ -33,10 +33,10 @@ export default function HistoryScreen() {
         }
         ListEmptyComponent={
           <View className="items-center py-24">
-            <View className="w-20 h-20 rounded-full bg-white items-center justify-center mb-4 shadow-sm">
+            <View className="w-20 h-20 rounded-full bg-white dark:bg-[#1C1C1E] items-center justify-center mb-4 shadow-sm">
               <Ionicons name="file-tray-outline" size={36} color="#C7C7CC" />
             </View>
-            <Text className="text-[17px] font-semibold text-[#1C1C1E] mb-1">
+            <Text className="text-[17px] font-semibold text-[#1C1C1E] dark:text-white mb-1">
               No Bills Yet
             </Text>
             <Text className="text-[15px] text-[#8E8E93]">
@@ -47,7 +47,7 @@ export default function HistoryScreen() {
         renderSectionHeader={({ section: { title, data } }) => {
           const total = data.reduce((sum, b) => sum + b.amount, 0);
           return (
-            <View className="flex-row items-center justify-between px-5 py-2 bg-[#F2F2F7]">
+            <View className="flex-row items-center justify-between px-5 py-2 bg-[#F2F2F7] dark:bg-black">
               <Text className="text-[13px] font-semibold text-[#8E8E93] uppercase tracking-widest">
                 {title}
               </Text>

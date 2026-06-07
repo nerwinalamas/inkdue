@@ -33,7 +33,7 @@ export default function NavBar({ title, left, right }: Props) {
       )}
 
       {/* Title */}
-      <Text className="flex-1 text-center text-[17px] font-semibold text-[#1C1C1E]">
+      <Text className="flex-1 text-center text-[17px] font-semibold text-[#1C1C1E] dark:text-white">
         {title}
       </Text>
 

@@ -93,14 +93,14 @@ export default function EditBillScreen() {
 
   if (!loaded) {
     return (
-      <SafeAreaView className="flex-1 bg-[#F2F2F7] items-center justify-center">
+      <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black items-center justify-center">
         <Text className="text-[#8E8E93] text-[17px]">Loading…</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F7]">
+    <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 48 }}

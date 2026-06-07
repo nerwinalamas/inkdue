@@ -1,6 +1,14 @@
 import Header from "@/components/header";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+import {
+  Appearance,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type RowIcon = {
@@ -19,7 +27,7 @@ function SectionLabel({ title }: { title: string }) {
 
 function SettingsGroup({ children }: { children: React.ReactNode }) {
   return (
-    <View className="mx-5 bg-white rounded-2xl overflow-hidden mb-4">
+    <View className="mx-5 bg-white dark:bg-[#1C1C1E] rounded-2xl overflow-hidden mb-4">
       {children}
     </View>
   );
@@ -27,8 +35,8 @@ function SettingsGroup({ children }: { children: React.ReactNode }) {
 
 function RowDivider() {
   return (
-    <View className="bg-white">
-      <View className="ml-14 h-[0.5px] bg-[#E5E5EA]" />
+    <View className="bg-white dark:bg-[#1C1C1E]">
+      <View className="ml-14 h-[0.5px] bg-[#E5E5EA] dark:bg-[#3A3A3C]" />
     </View>
   );
 }
@@ -52,7 +60,9 @@ function ToggleRow({
       >
         <Ionicons name={icon.name as any} size={16} color={icon.color} />
       </View>
-      <Text className="flex-1 text-[16px] text-[#1C1C1E]">{label}</Text>
+      <Text className="flex-1 text-[16px] text-[#1C1C1E] dark:text-white">
+        {label}
+      </Text>
       <Switch
         value={value}
         onValueChange={onValueChange}
@@ -90,7 +100,7 @@ function ChevronRow({
         <Ionicons name={icon.name as any} size={16} color={icon.color} />
       </View>
       <Text
-        className={`flex-1 text-[16px] ${destructive ? "text-[#FF3B30]" : "text-[#1C1C1E]"}`}
+        className={`flex-1 text-[16px] ${destructive ? "text-[#FF3B30]" : "text-[#1C1C1E] dark:text-white"}`}
       >
         {label}
       </Text>
@@ -105,8 +115,15 @@ function ChevronRow({
 }
 
 export default function SettingsScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  function toggleDarkMode(value: boolean) {
+    Appearance.setColorScheme(value ? "dark" : "light");
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F7]">
+    <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -155,8 +172,8 @@ export default function SettingsScreen() {
             <ToggleRow
               icon={{ name: "moon-outline", bg: "#8E8E93", color: "white" }}
               label="Dark mode"
-              value={false}
-              onValueChange={() => {}}
+              value={isDark}
+              onValueChange={toggleDarkMode}
             />
             <RowDivider />
             <ChevronRow

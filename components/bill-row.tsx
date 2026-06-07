@@ -36,7 +36,7 @@ export function BillRow({
             params: { id: bill.id, source },
           })
         }
-        className={`bg-white ${borderRadius} px-4 flex-row items-center`}
+        className={`bg-white dark:bg-[#1C1C1E] ${borderRadius} px-4 flex-row items-center`}
         style={{ minHeight: 68 }}
       >
         <View
@@ -47,7 +47,7 @@ export function BillRow({
 
         <View className="flex-1 py-3">
           <Text
-            className="text-[17px] font-medium text-[#1C1C1E]"
+            className="text-[17px] font-medium text-[#1C1C1E] dark:text-white"
             numberOfLines={1}
           >
             {bill.biller_name}
@@ -71,14 +71,14 @@ export function BillRow({
           )}
         </View>
 
-        <Text className="text-[17px] font-semibold text-[#1C1C1E] ml-3">
+        <Text className="text-[17px] font-semibold text-[#1C1C1E] dark:text-white ml-3">
           ₱{bill.amount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
         </Text>
       </TouchableOpacity>
 
       {showDivider && (
-        <View className="bg-white">
-          <View className="ml-17 h-[0.5px] bg-[#C6C6C8]" />
+        <View className="bg-white dark:bg-[#1C1C1E]">
+          <View className="ml-17 h-[0.5px] bg-[#C6C6C8] dark:bg-[#3A3A3C]" />
         </View>
       )}
     </View>

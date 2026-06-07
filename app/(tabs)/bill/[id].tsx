@@ -78,17 +78,21 @@ function InfoRow({
         className="px-4 py-3 flex-row items-center"
         style={{ minHeight: 56 }}
       >
-        <View className="w-8 h-8 rounded-lg bg-gray-100 items-center justify-center mr-3">
+        <View className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#2C2C2E] items-center justify-center mr-3">
           <Ionicons name={icon as any} size={16} color="#6C6C70" />
         </View>
         <View className="flex-1">
           <Text className="text-[11px] text-[#8E8E93] font-medium mb-0.5">
             {label}
           </Text>
-          <Text className="text-[17px] text-[#1C1C1E]">{value}</Text>
+          <Text className="text-[17px] text-[#1C1C1E] dark:text-white">
+            {value}
+          </Text>
         </View>
       </View>
-      {!isLast && <View className="ml-15 h-[0.5px] bg-[#C6C6C8]" />}
+      {!isLast && (
+        <View className="ml-15 h-[0.5px] bg-[#C6C6C8] dark:bg-[#3A3A3C]" />
+      )}
     </>
   );
 }
@@ -110,7 +114,7 @@ export default function BillDetailScreen() {
 
   if (!bill) {
     return (
-      <SafeAreaView className="flex-1 bg-[#F2F2F7] items-center justify-center">
+      <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black items-center justify-center">
         <Text className="text-[#8E8E93] text-[17px]">Bill not found.</Text>
       </SafeAreaView>
     );
@@ -158,7 +162,7 @@ export default function BillDetailScreen() {
   const isPaid = bill.status === "paid";
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F2F2F7]">
+    <SafeAreaView className="flex-1 bg-[#F2F2F7] dark:bg-black">
       <NavBar
         title="Bill Details"
         left={{
@@ -177,16 +181,16 @@ export default function BillDetailScreen() {
         contentContainerStyle={{ paddingBottom: 48 }}
       >
         {/* Hero amount card */}
-        <View className="mx-5 mt-2 mb-6 bg-white rounded-2xl px-6 py-6 items-center">
+        <View className="mx-5 mt-2 mb-6 bg-white dark:bg-[#1C1C1E] rounded-2xl px-6 py-6 items-center">
           <View
             className={`w-16 h-16 rounded-full ${colors.bg} items-center justify-center mb-3`}
           >
             <Ionicons name={icon} size={32} color={colors.icon} />
           </View>
-          <Text className="text-[22px] font-semibold text-[#1C1C1E] mb-1">
+          <Text className="text-[22px] font-semibold text-[#1C1C1E] dark:text-white mb-1">
             {bill.biller_name}
           </Text>
-          <Text className="text-[34px] font-bold text-[#1C1C1E] mb-3">
+          <Text className="text-[34px] font-bold text-[#1C1C1E] dark:text-white mb-3">
             ₱
             {bill.amount.toLocaleString("en-PH", {
               minimumFractionDigits: 2,
@@ -212,7 +216,7 @@ export default function BillDetailScreen() {
           <Text className="text-[13px] font-semibold text-[#8E8E93] uppercase tracking-widest mb-2 ml-1">
             Details
           </Text>
-          <View className="bg-white rounded-2xl overflow-hidden">
+          <View className="bg-white dark:bg-[#1C1C1E] rounded-2xl overflow-hidden">
             <InfoRow
               icon="calendar-outline"
               label="Due Date"
@@ -243,12 +247,16 @@ export default function BillDetailScreen() {
         {/* Mark as paid / unpaid */}
         <View className="mx-5 mb-3">
           <TouchableOpacity
-            className={`rounded-2xl py-4 items-center ${isPaid ? "bg-white" : "bg-[#0A84FF]"}`}
+            className={`rounded-2xl py-4 items-center ${
+              isPaid ? "bg-white dark:bg-[#1C1C1E]" : "bg-[#0A84FF]"
+            }`}
             activeOpacity={0.8}
             onPress={handleTogglePaid}
           >
             <Text
-              className={`text-[17px] font-semibold ${isPaid ? "text-[#0A84FF]" : "text-white"}`}
+              className={`text-[17px] font-semibold ${
+                isPaid ? "text-[#0A84FF]" : "text-white"
+              }`}
             >
               {isPaid ? "Mark as Unpaid" : "Mark as Paid"}
             </Text>
@@ -258,7 +266,7 @@ export default function BillDetailScreen() {
         {/* Delete */}
         <View className="mx-5">
           <TouchableOpacity
-            className="bg-white rounded-2xl py-4 items-center"
+            className="bg-white dark:bg-[#1C1C1E] rounded-2xl py-4 items-center"
             activeOpacity={0.7}
             onPress={handleDelete}
           >
@@ -272,7 +280,7 @@ export default function BillDetailScreen() {
         {bill.image_uri && bill.source !== "manual" && (
           <View className="mx-5 mt-3">
             <TouchableOpacity
-              className="bg-white rounded-2xl py-4 items-center flex-row justify-center gap-2"
+              className="bg-white dark:bg-[#1C1C1E] rounded-2xl py-4 items-center flex-row justify-center gap-2"
               activeOpacity={0.7}
               onPress={() => setShowImage(true)}
             >

@@ -12,6 +12,7 @@ import "../global.css";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { initDatabase } from "@/lib/database";
 import { requestNotificationPermissions } from "@/lib/notifications";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Init SQLite DB on app start
@@ -23,6 +24,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   useEffect(() => {
     requestNotificationPermissions();
@@ -30,11 +32,16 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" />
+      <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+        <View
+          style={{ flex: 1 }}
+          className={`will-change-container ${isDark ? "dark" : ""}`}
+        >
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </View>
       </ThemeProvider>
     </SafeAreaProvider>
   );

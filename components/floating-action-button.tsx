@@ -167,7 +167,7 @@ export default function FloatingActionButton() {
             >
               {/* Label */}
               <View className="absolute right-16 top-0 bottom-0 justify-center items-center pr-3">
-                <Text className="text-[13px] min-w-27.5 text-right font-medium text-gray-800 tracking-tight">
+                <Text className="text-[13px] min-w-27.5 text-right font-medium tracking-tight text-[#1C1C1E] dark:text-[#F2F2F7]">
                   {action.label}
                 </Text>
               </View>
