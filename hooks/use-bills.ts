@@ -4,6 +4,7 @@ import {
   addBill,
   deleteAllBills,
   deleteBill,
+  getBillById,
   getBills,
   getTotalUnpaid,
   getUnpaidBills,
@@ -11,7 +12,22 @@ import {
   markAsUnpaid,
   updateBill,
 } from "@/lib/database";
+import {
+  cancelBillReminders,
+  scheduleBillReminders,
+} from "@/lib/notifications";
+import * as SQLite from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
+
+const db = SQLite.openDatabaseSync("inkdue.db");
+
+function getNotificationSettings() {
+  return db.getFirstSync<{
+    bill_reminders: number;
+    overdue_alerts: number;
+    remind_days_before: number;
+  }>("SELECT * FROM notification_settings WHERE id = 1");
+}
 
 export function useBills() {
   const [bills, setBills] = useState<Bill[]>([]);
@@ -31,18 +47,88 @@ export function useBills() {
     refresh();
   }, [refresh]);
 
-  function handleAddBill(bill: NewBill): number {
+  async function handleAddBill(bill: NewBill): Promise<number> {
     const id = addBill(bill);
+
+    try {
+      const notifSettings = getNotificationSettings();
+      if (notifSettings?.bill_reminders && bill.due_date) {
+        const ids = await scheduleBillReminders(
+          id,
+          bill.biller_name,
+          bill.amount,
+          bill.due_date,
+        );
+        if (ids.length > 0) {
+          updateBill(id, { notification_id: ids.join(",") });
+        }
+      }
+    } catch (e) {
+      console.warn("Could not schedule notifications:", e);
+    }
+
     refresh();
     return id;
   }
 
-  function handleUpdateBill(id: number, bill: Partial<NewBill>) {
-    updateBill(id, bill);
+  async function handleUpdateBill(id: number, bill: Partial<NewBill>) {
+    const existing = getBillById(id);
+
+    // Cancel old notifications before anything else
+    if (existing?.notification_id) {
+      try {
+        await cancelBillReminders(existing.notification_id);
+      } catch (e) {
+        console.warn("Could not cancel old notifications:", e);
+      }
+    }
+
+    // Compute the merged bill state so we only call updateBill once
+    const mergedBillerName = bill.biller_name ?? existing?.biller_name ?? "";
+    const mergedAmount = bill.amount ?? existing?.amount ?? 0;
+    const mergedDueDate = bill.due_date ?? existing?.due_date ?? "";
+    const mergedStatus = bill.status ?? existing?.status ?? "unpaid";
+
+    let newNotificationId: string | null = null;
+
+    try {
+      const notifSettings = getNotificationSettings();
+      if (
+        notifSettings?.bill_reminders &&
+        mergedDueDate &&
+        mergedStatus === "unpaid"
+      ) {
+        const ids = await scheduleBillReminders(
+          id,
+          mergedBillerName,
+          mergedAmount,
+          mergedDueDate,
+        );
+        if (ids.length > 0) {
+          newNotificationId = ids.join(",");
+        }
+      }
+    } catch (e) {
+      console.warn("Could not schedule notifications:", e);
+    }
+
+    // Single updateBill call — no double-write, no null object passed to Kotlin
+    updateBill(id, { ...bill, notification_id: newNotificationId });
+
     refresh();
   }
 
-  function handleMarkAsPaid(id: number) {
+  async function handleMarkAsPaid(id: number) {
+    const bill = getBillById(id);
+    if (bill?.notification_id) {
+      try {
+        await cancelBillReminders(bill.notification_id);
+      } catch (e) {
+        console.warn("Could not cancel notifications:", e);
+      }
+    }
+    // Use a single updateBill + markAsPaid to avoid redundant writes
+    updateBill(id, { notification_id: null });
     markAsPaid(id);
     refresh();
   }
@@ -52,12 +138,24 @@ export function useBills() {
     refresh();
   }
 
-  function handleDeleteBill(id: number) {
+  async function handleDeleteBill(id: number) {
+    const bill = getBillById(id);
+    if (bill?.notification_id) {
+      try {
+        await cancelBillReminders(bill.notification_id);
+      } catch (e) {
+        console.warn("Could not cancel notifications:", e);
+      }
+    }
     deleteBill(id);
     refresh();
   }
 
-  function handleDeleteAllBills() {
+  async function handleDeleteAllBills() {
+    const allBills = getBills();
+    await Promise.allSettled(
+      allBills.map((b) => cancelBillReminders(b.notification_id)),
+    );
     deleteAllBills();
     refresh();
   }

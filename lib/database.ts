@@ -34,6 +34,15 @@ const MIGRATIONS: { name: string; sql: string }[] = [
     name: "002_add_source",
     sql: "ALTER TABLE bills ADD COLUMN source TEXT",
   },
+  {
+    name: "003_add_notification_settings",
+    sql: `CREATE TABLE IF NOT EXISTS notification_settings (
+      id                  INTEGER PRIMARY KEY DEFAULT 1,
+      bill_reminders      INTEGER NOT NULL DEFAULT 1,
+      overdue_alerts      INTEGER NOT NULL DEFAULT 1,
+      remind_days_before  INTEGER NOT NULL DEFAULT 3
+    )`,
+  },
 ];
 
 function runMigrations() {
@@ -130,10 +139,24 @@ export function addBill(bill: NewBill): number {
 }
 
 export function updateBill(id: number, bill: Partial<NewBill>): void {
-  const fields = Object.keys(bill)
-    .map((key) => `${key} = ?`)
-    .join(", ");
-  const values = [...Object.values(bill), id];
+  const keys = Object.keys(bill);
+  if (keys.length === 0) return;
+
+  const fields = keys.map((key) => `${key} = ?`).join(", ");
+
+  // Explicitly coerce each value: null/undefined → null, boolean → 0/1,
+  // everything else passes through. This prevents Android's Kotlin bridge
+  // from choking on JS null objects or unexpected types.
+  const values: SQLite.SQLiteBindValue[] = [
+    ...keys.map((key) => {
+      const v = (bill as Record<string, unknown>)[key];
+      if (v === null || v === undefined) return null;
+      if (typeof v === "boolean") return v ? 1 : 0;
+      return v as SQLite.SQLiteBindValue;
+    }),
+    id,
+  ];
+
   db.runSync(`UPDATE bills SET ${fields} WHERE id = ?`, values);
 }
 

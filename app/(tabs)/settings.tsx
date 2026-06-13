@@ -1,6 +1,7 @@
 import Header from "@/components/header";
 import { useBills } from "@/hooks/use-bills";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useNotificationSettings } from "@/hooks/use-notification-settings";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Alert,
@@ -119,6 +120,7 @@ function ChevronRow({
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const { deleteAllBills } = useBills();
+  const { settings, updateSettings } = useNotificationSettings();
 
   const isDark = colorScheme === "dark";
 
@@ -156,14 +158,14 @@ export default function SettingsScreen() {
                 color: "white",
               }}
               label="Bill reminders"
-              value={true}
-              onValueChange={() => {}}
+              value={settings.billReminders}
+              onValueChange={(v) => updateSettings({ billReminders: v })}
             />
             <RowDivider />
             <ChevronRow
               icon={{ name: "time-outline", bg: "#FF9500", color: "white" }}
               label="Remind me before"
-              value="3 days"
+              value={`${settings.remindDaysBefore} days`}
               onPress={() => {}}
             />
             <RowDivider />
@@ -174,8 +176,8 @@ export default function SettingsScreen() {
                 color: "white",
               }}
               label="Overdue alerts"
-              value={true}
-              onValueChange={() => {}}
+              value={settings.overdueAlerts}
+              onValueChange={(v) => updateSettings({ overdueAlerts: v })}
             />
           </SettingsGroup>
         </View>
