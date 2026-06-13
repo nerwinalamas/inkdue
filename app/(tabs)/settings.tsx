@@ -175,62 +175,6 @@ export default function SettingsScreen() {
               value={isDark}
               onValueChange={toggleDarkMode}
             />
-            <RowDivider />
-            <ChevronRow
-              icon={{ name: "cash-outline", bg: "#32ADE6", color: "white" }}
-              label="Currency"
-              value="₱ PHP"
-              onPress={() => {}}
-            />
-          </SettingsGroup>
-        </View>
-
-        {/* Data */}
-        <View className="mb-1">
-          <SectionLabel title="Data" />
-          <SettingsGroup>
-            <ChevronRow
-              icon={{ name: "download-outline", bg: "#34C759", color: "white" }}
-              label="Export bills"
-              onPress={() => {}}
-            />
-            <RowDivider />
-            <ChevronRow
-              icon={{
-                name: "cloud-upload-outline",
-                bg: "#0A84FF",
-                color: "white",
-              }}
-              label="Import bills"
-              onPress={() => {}}
-            />
-          </SettingsGroup>
-        </View>
-
-        {/* About */}
-        <View className="mb-1">
-          <SectionLabel title="About" />
-          <SettingsGroup>
-            <ChevronRow
-              icon={{
-                name: "information-circle-outline",
-                bg: "#8E8E93",
-                color: "white",
-              }}
-              label="Version"
-              value="1.0.0"
-              onPress={() => {}}
-            />
-            <RowDivider />
-            <ChevronRow
-              icon={{
-                name: "document-text-outline",
-                bg: "#8E8E93",
-                color: "white",
-              }}
-              label="Privacy policy"
-              onPress={() => {}}
-            />
           </SettingsGroup>
         </View>
 
