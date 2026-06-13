@@ -2,6 +2,7 @@ import {
   Bill,
   NewBill,
   addBill,
+  deleteAllBills,
   deleteBill,
   getBills,
   getTotalUnpaid,
@@ -56,6 +57,11 @@ export function useBills() {
     refresh();
   }
 
+  function handleDeleteAllBills() {
+    deleteAllBills();
+    refresh();
+  }
+
   return {
     bills,
     unpaidBills,
@@ -67,5 +73,6 @@ export function useBills() {
     markAsPaid: handleMarkAsPaid,
     markAsUnpaid: handleMarkAsUnpaid,
     deleteBill: handleDeleteBill,
+    deleteAllBills: handleDeleteAllBills,
   };
 }

@@ -1,7 +1,9 @@
 import Header from "@/components/header";
+import { useBills } from "@/hooks/use-bills";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Ionicons } from "@expo/vector-icons";
 import {
+  Alert,
   Appearance,
   ScrollView,
   Switch,
@@ -116,10 +118,23 @@ function ChevronRow({
 
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
+  const { deleteAllBills } = useBills();
+
   const isDark = colorScheme === "dark";
 
   function toggleDarkMode(value: boolean) {
     Appearance.setColorScheme(value ? "dark" : "light");
+  }
+
+  function confirmDeleteAll() {
+    Alert.alert(
+      "Delete all bills",
+      "This will permanently remove all your bills. This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: deleteAllBills },
+      ],
+    );
   }
 
   return (
@@ -184,7 +199,7 @@ export default function SettingsScreen() {
             <ChevronRow
               icon={{ name: "trash-outline", bg: "#FF3B30", color: "white" }}
               label="Delete all bills"
-              onPress={() => {}}
+              onPress={confirmDeleteAll}
               destructive
             />
           </SettingsGroup>
